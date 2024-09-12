@@ -35,7 +35,7 @@ async def add_warehouse(
     body: schemas.AddWarehouse,
     db_session: AsyncSession = Depends(get_async_session)
 ) -> schemas.ShowWarehouse:
-    await _add_warehouse(
+    return await _add_warehouse(
         body=body,
         db_session=db_session
     )
