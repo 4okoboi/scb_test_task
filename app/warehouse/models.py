@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float
 from sqlalchemy.orm import declarative_base
-
-Base = declarative_base()
+from app.database import Base
 
 class Warehouse(Base):
     __tablename__ = "warehouse"
