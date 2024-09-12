@@ -7,8 +7,11 @@ services:
     command: -p 5435
     expose:
       - 5435
-    env_file: 
-      - .env
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+
   
   app:
     build: 
