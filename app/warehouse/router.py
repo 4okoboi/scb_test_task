@@ -35,14 +35,9 @@ async def add_warehouse(
     body: schemas.AddWarehouse,
     db_session: AsyncSession = Depends(get_async_session)
 ) -> schemas.ShowWarehouse:
-    try:
-        await _add_warehouse(
-            body=body,
-            db_session=db_session
-        )
-    except Exception as err:
-        raise HTTPException(
-            status_code=503,
-            detail="Error on server, please try again later"
-        )
+    await _add_warehouse(
+        body=body,
+        db_session=db_session
+    )
+    
         
