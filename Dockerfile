@@ -11,7 +11,7 @@ COPY pyproject.toml poetry.lock* /backend/
 RUN poetry config virtualenvs.create false && poetry install --no-dev --no-interaction --no-ansi
 
 
-RUN chmod a+x docker/*.sh
+RUN chmod a+x docker/app.sh
 
 # COPY . .
 
