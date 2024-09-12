@@ -4,7 +4,7 @@ services:
   db:
     image: postgres:15
     container_name: db_app
-    command: --port 5435
+    command: -p 5435
     expose:
       - 5435
     env_file: 
