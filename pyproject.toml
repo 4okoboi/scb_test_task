@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "scb-test-task"
+version = "0.1.0"
+description = ""
+authors = ["4okoboi <zakiroffkam@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.114.1"
+sqlalchemy = "^2.0.34"
+psycopg2 = "^2.9.9"
+asyncpg = "^0.29.0"
+dadata = "^21.10.1"
+python-dotenv = "^1.0.1"
+uvicorn = "^0.30.6"
+gunicorn = "^23.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
