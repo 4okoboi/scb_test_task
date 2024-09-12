@@ -1,5 +1,5 @@
 from dadata import DadataAsync
-from config import dadata_secret as secret, dadata_api_key as token
+from config import dadata_secret as secret, dadata_token as token
 
 
 async def get_valid_address_and_coords(
