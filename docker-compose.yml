@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    container_name: db_app
+    command: --port 5435
+    expose:
+      - 5435
+    env_file: 
+      - .env
+  
+  app:
+    build: 
+      context: .
+    env_file:
+     - .env
+    container_name: fastapi_app
+    command: ["/backend/docker/app.sh"]
+    ports:
+     - 8000:8000
+    depends_on:
+     - db
