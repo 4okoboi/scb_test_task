@@ -7,5 +7,5 @@ async def get_valid_address_and_coords(
 ) -> (str, float, float): # type: ignore
     async with DadataAsync(token) as dadata:
         raw_data = (await dadata.suggest("address", address))[0]
-        return (raw_data["value"], raw_data["data"]["geo_lat"], raw_data["data"]["geo_lon"])
+        return (raw_data["value"], float(raw_data["data"]["geo_lat"]), float(raw_data["data"]["geo_lon"]))
     
