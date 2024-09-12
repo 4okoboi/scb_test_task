@@ -11,6 +11,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
+    networks:
+      - backend_network
 
   
   app:
@@ -23,3 +25,9 @@ services:
      - 8000:8000
     depends_on:
      - db
+    networks:
+      - backend_network
+
+networks:
+  backend_network:
+    driver: bridge
