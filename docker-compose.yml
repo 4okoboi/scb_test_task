@@ -16,7 +16,6 @@ services:
     env_file:
      - .env
     container_name: fastapi_app
-    command: ["/docker/app.sh"]
     ports:
      - 8000:8000
     depends_on:
