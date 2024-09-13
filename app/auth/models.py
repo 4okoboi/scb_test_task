@@ -3,9 +3,7 @@ from sqlalchemy import Column, String, Boolean
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 import uuid
 from enum import Enum
-
-Base = declarative_base()
-
+from app.database import Base
 
 class Role(str, Enum):
     ROLE_ADMIN = "ROLE_ADMIN"

@@ -2,7 +2,7 @@ from app.auth.models import User as UserModel, Role
 from app.database import DAL
 from typing import Union
 from uuid import UUID
-from sqlalchemy import select, update, and_
+from sqlalchemy import delete, select, update, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 class UserDAL(DAL):
@@ -39,9 +39,8 @@ class UserDAL(DAL):
         user_id: UUID
     ) -> Union[UUID, None]:
         query = (
-            update(UserModel)
-            .where(and_(UserModel.id == user_id, UserModel.is_active == True))
-            .values(is_active=False)
+            delete(UserModel)
+            .where(and_(UserModel.id == user_id, UserModel.role == Role.ROLE_CLIENT))
             .returning(UserModel.id)
         )
         res = await self.db_session.execute(query)
