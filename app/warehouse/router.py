@@ -39,5 +39,3 @@ async def add_warehouse(
         body=body,
         db_session=db_session
     )
-    
-        

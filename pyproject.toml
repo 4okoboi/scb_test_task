@@ -16,6 +16,8 @@ python-dotenv = "^1.0.1"
 uvicorn = "^0.30.6"
 gunicorn = "^23.0.0"
 alembic = "^1.13.2"
+passlib = "^1.7.4"
+python-jose = "^3.3.0"
 
 
 [build-system]
