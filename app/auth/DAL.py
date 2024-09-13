@@ -28,7 +28,7 @@ class UserDAL(DAL):
                 username=username,
                 email=email,
                 hashed_password=hashed_password,
-                roles=role
+                role=role
             )
         self.db_session.add(new_user)
         await self.db_session.flush()

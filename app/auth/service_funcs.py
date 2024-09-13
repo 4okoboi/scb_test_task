@@ -19,7 +19,7 @@ async def _create_admin(
             username=body.username,
             email=body.email,
             hashed_password=Hasher.get_password_hash(body.password),
-            roles=Role.ROLE_ADMIN
+            role=Role.ROLE_ADMIN
         )
         return schemas.ShowAdmin(
             username=user.username,
