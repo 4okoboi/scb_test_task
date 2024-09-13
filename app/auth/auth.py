@@ -1,5 +1,5 @@
 from app.auth.DAL import UserDAL
-from app.auth.models import User as UserModel, Roles
+from app.auth.models import User as UserModel
 from app.database import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 
