@@ -1,5 +1,7 @@
 from fastapi import FastAPI, APIRouter
 from app.warehouse.router import warehouse_router
+from app.auth.handlers import user_router
+from app.auth.login_handler import login_router
 
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,7 +23,9 @@ app = FastAPI(
 main_router = APIRouter()
 
 
-main_router.include_router(warehouse_router, prefix="/warehouse", tags=["user"])
+main_router.include_router(warehouse_router, prefix="/warehouse", tags=["warehouse"])
+main_router.include_router(user_router, prefix="/user", tags=["user"])
+main_router.include_router(login_router, prefix="/login", tags=["login"])
 
 app.include_router(main_router)
 
