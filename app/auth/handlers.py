@@ -116,7 +116,7 @@ async def update_client(
     if service_funcs._check_user_permissions(current_user=current_user, target_user=user_for_update):
         try:
             updated_user_id = await service_funcs._update_client(
-                updated_user_params=updated_user_params, session=db, user_id=user_id
+                updated_client_params=updated_user_params, session=db, user_id=user_id
             )
         except Exception as err:
             raise HTTPException(status_code=503, detail=f"Database error: {err}")
