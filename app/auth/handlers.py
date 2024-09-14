@@ -14,7 +14,7 @@ from app.auth import schemas
 
 user_router = APIRouter()
 
-@user_router.post("admin", response_model=schemas.ShowAdmin)
+@user_router.post("/admin", response_model=schemas.ShowAdmin)
 async def create_admin(
     body: schemas.CreateAdmin,
     db: AsyncSession = Depends(get_async_session)
@@ -27,7 +27,7 @@ async def create_admin(
             detail=f"Database error, {err}"
         )
         
-@user_router.post("client", response_model=schemas.ShowClient)
+@user_router.post("/client", response_model=schemas.ShowClient)
 async def add_client(
     body: schemas.AddClient,
     db: AsyncSession = Depends(get_async_session),
@@ -47,7 +47,7 @@ async def add_client(
         )
     
     
-@user_router.delete("", response_model=schemas.DeleteUser)
+@user_router.delete("/", response_model=schemas.DeleteUser)
 async def delete_user(
     user_id: UUID,
     db: AsyncSession = Depends(get_async_session),
@@ -70,7 +70,7 @@ async def delete_user(
     deleted_user_id = await service_funcs._delete_user(user_id, session=db)
     return schemas.DeleteUser(user_id=deleted_user_id)
 
-@user_router.get("client", response_model=schemas.ShowClient)
+@user_router.get("/client", response_model=schemas.ShowClient)
 async def get_client_by_id(
     user_id: UUID,
     db: AsyncSession = Depends(get_async_session),
@@ -95,7 +95,7 @@ async def get_client_by_id(
     )
 
 
-@user_router.patch("client", response_model=schemas.UpdateClientResponse)
+@user_router.patch("/client", response_model=schemas.UpdateClientResponse)
 async def update_client(
     user_id: UUID,
     body: schemas.UpdateClientRequest,
