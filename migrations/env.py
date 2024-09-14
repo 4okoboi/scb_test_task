@@ -8,6 +8,7 @@ from config import DB_HOST, DB_NAME, DB_PORT, DB_PASS, DB_USER
 from app.database import Base
 from app.auth.models import User
 from app.warehouse.models import Warehouse
+from app.application.models import PackageType, Application
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
