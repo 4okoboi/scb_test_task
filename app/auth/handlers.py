@@ -47,7 +47,7 @@ async def add_client(
         )
     
     
-@user_router.delete("/", response_model=schemas.DeleteUser)
+@user_router.delete("", response_model=schemas.DeleteUser)
 async def delete_user(
     user_id: UUID,
     db: AsyncSession = Depends(get_async_session),
@@ -113,15 +113,16 @@ async def update_client(
         raise HTTPException(
             status_code=404, detail=f"User with id {user_id} not found."
         )
-    if user_id != current_user.user_id:
-        if service_funcs.check_user_permissions(
-            target_user=user_for_update, current_user=current_user
-        ):
-            raise HTTPException(status_code=403, detail="Forbidden.")
-    try:
-        updated_user_id = await service_funcs._update_client(
-            updated_user_params=updated_user_params, session=db, user_id=user_id
+    if service_funcs._check_user_permissions(current_user=current_user, target_user=user_for_update):
+        try:
+            updated_user_id = await service_funcs._update_client(
+                updated_user_params=updated_user_params, session=db, user_id=user_id
+            )
+        except Exception as err:
+            raise HTTPException(status_code=503, detail=f"Database error: {err}")
+        return schemas.UpdateClientResponse(user_id=updated_user_id)
+    else:
+        raise HTTPException(
+            status_code=403,
+            detail="Forbidden."
         )
-    except Exception as err:
-        raise HTTPException(status_code=503, detail=f"Database error: {err}")
-    return schemas.UpdateClientResponse(user_id=updated_user_id)

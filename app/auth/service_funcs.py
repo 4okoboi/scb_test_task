@@ -75,6 +75,8 @@ async def _update_client(
     session
 ) -> Union[UUID, None]:
     async with session.begin():
+        if "actual_address" in updated_client_params.keys():
+            updated_client_params["actual_address"], _, _ = await get_valid_address_and_coords(address=updated_client_params.get("actual_address"))
         user_dal = UserDAL(session)
         updated_user_id = await user_dal.update_user(user_id=user_id, **updated_client_params)
         return updated_user_id
