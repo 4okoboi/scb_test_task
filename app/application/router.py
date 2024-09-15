@@ -97,6 +97,10 @@ async def _show_status(
         )
         if status is None:
             raise application_not_found_exception
+        return schemas.ShowApplicationStatus(
+            application_id=application_id,
+            status=status.status
+        )
     
 async def _show_application(
     application_id: int,
@@ -164,7 +168,10 @@ async def show_application_status(
     application_id: int,
     db_session: AsyncSession = Depends(get_async_session)
 ) -> schemas.ShowApplicationStatus:
-    pass
+    return await _show_status(
+        application_id=application_id,
+        db_session=db_session
+    )
 
 
 @application_router.patch("", response_model=schemas.AfterApplicationCreated)
