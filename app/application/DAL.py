@@ -32,13 +32,13 @@ class ApplicationDAL(DAL):
         )
         self.db_session.add(new_application)
         await self.db_session.flush()
-        # TODO: переделать под триггеры
-        application_status = ApplicationStatusCurrent(
-            application_id=new_application.id_,
-            status="New"
-        )
-        self.db_session.add(application_status)
-        await self.db_session.flush()
+        # # TODO: переделать под триггеры
+        # application_status = ApplicationStatusCurrent(
+        #     application_id=new_application.id_,
+        #     status="New"
+        # )
+        # self.db_session.add(application_status)
+        # await self.db_session.flush()
         return new_application
 
     async def get_application_by_id(
