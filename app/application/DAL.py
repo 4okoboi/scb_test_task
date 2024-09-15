@@ -21,7 +21,7 @@ class ApplicationDAL(DAL):
     ) -> Application:
         new_application = Application(
             city=city,
-            ship_address=ship_address,
+            addresss=ship_address,
             warehouse_id=warehouse_id,
             client_id=client_id,
             distance=distance,
