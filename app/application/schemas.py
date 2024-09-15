@@ -1,5 +1,4 @@
-from fastapi import HTTPException
-from pydantic import BaseModel, Field, field_validator, validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from datetime import date, datetime, time
 from typing import Optional
 
@@ -52,20 +51,18 @@ class UpdateApplication(BaseModel):
     comment: Optional[str] = Field(None)
     
     @field_validator('ship_time')
-    def validate_ship_datetime(cls, v, values):
-        ship_date = values.get('ship_date')
+    def validate_ship_datetime(cls, v, info):
+        ship_date = info.data.get('ship_date')
         ship_datetime = datetime.combine(ship_date, v)
         current_datetime = datetime.now()
         if ship_datetime < current_datetime:
             raise ValueError('Shipping date and time cannot be in the past.')
         return v
     
-    @field_validator('city', 'ship_address', pre=True, always=True)
-    def validate_city_address(cls, v, values, field):
+    @model_validator(mode='before')
+    def check_city_and_address(cls, values):
         city = values.get('city')
-        ship_address = values.get('ship_address')
-
-        if field.name == 'city' and v and not ship_address:
-            raise ValueError('City can only be changed along with the address.')
-
-        return v
+        address = values.get('ship_address')
+        if city and not address:
+            raise ValueError('City can only be changed with the address.')
+        return values
