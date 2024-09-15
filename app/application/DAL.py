@@ -78,7 +78,7 @@ class ApplicationDAL(DAL):
         status: str
     ) -> Union[int, None]:
         query = (update(ApplicationStatusCurrent)
-                 .where(ApplicationStatusCurrent.application_id)
+                 .where(ApplicationStatusCurrent.application_id == application_id)
                  .values(status=status)
                  .returning(ApplicationStatusCurrent.application_id))
         res = await self.db_session.execute(query)
