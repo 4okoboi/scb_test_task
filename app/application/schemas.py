@@ -14,7 +14,7 @@ class CreateApplication(BaseModel):
     
     @field_validator('ship_time')
     def validate_ship_datetime(cls, v, values):
-        ship_date = values.get('ship_date')
+        ship_date = info.data.get('ship_date')
         ship_datetime = datetime.combine(ship_date, v)
         current_datetime = datetime.now()
         if ship_datetime < current_datetime:
