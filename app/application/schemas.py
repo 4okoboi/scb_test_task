@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field
-from datetime import date, time
+from fastapi import HTTPException
+from pydantic import BaseModel, Field, field_validator, validator
+from datetime import date, datetime, time
 from typing import Optional
 
 
@@ -11,6 +12,14 @@ class CreateApplication(BaseModel):
     package_type_id: int
     comment: Optional[str] = Field(None)
     
+    @field_validator('ship_time')
+    def validate_ship_datetime(cls, v, values):
+        ship_date = values.get('ship_date')
+        ship_datetime = datetime.combine(ship_date, v)
+        current_datetime = datetime.now()
+        if ship_datetime < current_datetime:
+            raise ValueError('Shipping date and time cannot be in the past.')
+        return v
 
 class AfterApplicationCreated(BaseModel):
     application_id: int
@@ -41,3 +50,12 @@ class UpdateApplication(BaseModel):
     ship_date: Optional[date] = Field(None)
     ship_time: Optional[time] = Field(None)
     comment: Optional[str] = Field(None)
+    
+    @field_validator('ship_time')
+    def validate_ship_datetime(cls, v, values):
+        ship_date = values.get('ship_date')
+        ship_datetime = datetime.combine(ship_date, v)
+        current_datetime = datetime.now()
+        if ship_datetime < current_datetime:
+            raise ValueError('Shipping date and time cannot be in the past.')
+        return v

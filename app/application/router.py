@@ -16,6 +16,11 @@ from app.utils.count_dictance import count_distance
 
 application_router = APIRouter()
 
+application_not_found_exception = HTTPException(
+                status_code=404,
+                detail="Не найдена заявка с таким номером"
+            )
+
 async def _create_application(
     body: schemas.CreateApplication,
     client_address: str,
@@ -32,6 +37,11 @@ async def _create_application(
             point_a=(nearest_warehouse.Warehouse.geo_lat, nearest_warehouse.Warehouse.geo_lon),
             point_b=(ship_lat, ship_lon)
         )
+        if nearest_warehouse is None:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Не найдены склады по вашему городу. Проверьте правильность написания (наш сервис действителен в городах Казань, Набережные Челны, Нижнекамск, Альметьевск, Зеленодольск)"
+            )
         body.city = body.city.capitalize()
         if body.package_type_id == 3 and body.city != "Казань":
             raise HTTPException(
@@ -54,7 +64,67 @@ async def _create_application(
         return schemas.AfterApplicationCreated(
             application_id=application.id_
         )
+        
+async def _update_status(
+    application_id: int,
+    status: str,
+    db_session: AsyncSession
+) -> schemas.AfterApplicationCreated:
+    async with db_session.begin():
+        application_dal = ApplicationDAL(db_session)
+        application_to_update = application_dal.get_application_by_id(
+            application_id=application_id
+        )
+        if application_to_update is None:
+            raise application_not_found_exception
+        application_id = await application_dal.update_status(
+            application_id=application_id,
+            status=status
+        )
+        return application_id
     
+async def _show_status(
+    application_id: int,
+    db_session: AsyncSession
+) -> schemas.ShowApplicationStatus:
+    async with db_session.begin():
+        application_dal = ApplicationDAL(db_session)
+        status = await application_dal.get_status(
+            application_id=application_id
+        )
+        if status is None:
+            raise application_not_found_exception
+    
+async def _show_application(
+    application_id: int,
+    db_session: AsyncSession
+) -> schemas.ShowApplication:
+    async with db_session.begin():
+        application_dal = ApplicationDAL(db_session)
+        application = await application_dal.get_application_by_id(
+            application_id=application_id
+        )
+        if application is None:
+            raise application_not_found_exception
+        warehouse_dal = WarehouseDAL(db_session)
+        warehouse_address = await warehouse_dal.get_warehouse_address_by_id(
+            warehouse_id=application.warehouse_id
+        )
+        status = await application_dal.get_status(
+            application_id=application_id
+        )
+        return schemas.ShowApplication(
+            application_id=application.id_,
+            city=application.city,
+            ship_address=application.addresss,
+            warehouse_address=warehouse_address,
+            ship_date=application.ship_date,
+            ship_time=application.ship_time,
+            package_type_id=application.package_type_id,
+            distance=application.distance,
+            comment=application.comment,
+            status=status
+        )
 
 @application_router.post("", response_model=schemas.AfterApplicationCreated)
 async def create_application(
@@ -74,3 +144,76 @@ async def create_application(
     #         status_code=503,
     #         detail="Проблема на стороне сервера, попробуйте совершить запрос позже"
     #     )
+
+@application_router.get("", response_model=schemas.ShowApplication)
+async def show_application(
+    application_id: int,
+    db_session: AsyncSession = Depends(get_async_session)
+) -> schemas.ShowApplication:
+    return await _show_application(
+        application_id=application_id,
+        db_session=db_session
+    )
+
+
+@application_router.get("/status", response_model=schemas.ShowApplicationStatus)
+async def show_application_status(
+    application_id: int,
+    db_session: AsyncSession = Depends(get_async_session)
+) -> schemas.ShowApplicationStatus:
+    pass
+
+
+@application_router.patch("", response_model=schemas.AfterApplicationCreated)
+async def update_application(
+    application_id: int,
+    body: schemas.UpdateApplication,
+    db_session: AsyncSession = Depends(get_async_session)
+) -> schemas.AfterApplicationCreated:
+    pass
+
+@application_router.patch("/status/mark_as_done", response_model=schemas.AfterApplicationCreated)
+async def status_mark_as_done(
+    application_id: int,
+    db_session: AsyncSession = Depends(get_async_session)
+) -> schemas.AfterApplicationCreated:
+    return await _update_status(
+        application_id=application_id,
+        status="Done",
+        db_session=db_session
+    )
+
+
+@application_router.patch("/status/mark_as_cancelled", response_model=schemas.AfterApplicationCreated)
+async def status_mark_as_cancelled(
+    application_id: int,
+    db_session: AsyncSession = Depends(get_async_session)
+) -> schemas.AfterApplicationCreated:
+    return await _update_status(
+        application_id=application_id,
+        status="Cancelled",
+        db_session=db_session
+    )
+
+
+@application_router.patch("/status/mark_as_handed_to_courier", response_model=schemas.AfterApplicationCreated)
+async def status_mark_as_handed_to_courier(
+    application_id: int,
+    db_session: AsyncSession = Depends(get_async_session)
+) -> schemas.AfterApplicationCreated:
+    return await _update_status(
+        application_id=application_id,
+        status="Handed to courier",
+        db_session=db_session
+    )
+
+@application_router.patch("/status/mark_as_in_progress", response_model=schemas.AfterApplicationCreated)
+async def status_mark_as_in_progress(
+    application_id: int,
+    db_session: AsyncSession = Depends(get_async_session)
+) -> schemas.AfterApplicationCreated:
+    return await _update_status(
+        application_id=application_id,
+        status="In progress",
+        db_session=db_session
+    )

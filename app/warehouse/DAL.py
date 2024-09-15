@@ -46,3 +46,12 @@ class WarehouseDAL(DAL):
         nearest_warehouse = res.first()
         return nearest_warehouse
         
+    async def get_warehouse_address_by_id(
+        self,
+        warehouse_id: int
+    ) -> str:
+        query = select(Warehouse.address).where(Warehouse.id_ == warehouse_id)
+        res = await self.db_session.execute(query)
+        warehouse_address = res.fetchone()
+        if warehouse_address is not None:
+            return warehouse_address[0]

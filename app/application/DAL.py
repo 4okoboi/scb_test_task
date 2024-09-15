@@ -86,3 +86,13 @@ class ApplicationDAL(DAL):
         if application_id is not None:
             return application_id[0]
         
+    async def get_status(
+        self,
+        application_id: int
+    ) -> ApplicationStatusCurrent:
+        query = select(ApplicationStatusCurrent).where(ApplicationStatusCurrent.application_id == application_id)
+        res = await self.db_session.execute(query)
+        status = self.db_session.fetchone()
+        if status is not None:
+            return status[0]
+    
