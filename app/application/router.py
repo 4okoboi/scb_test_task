@@ -81,7 +81,10 @@ async def _update_status(
             application_id=application_id,
             status=status
         )
-        return application_id
+        return schemas.ShowApplicationStatus(
+            application_id=application_id,
+            status=status
+        )
     
 async def _show_status(
     application_id: int,
