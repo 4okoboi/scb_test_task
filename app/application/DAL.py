@@ -92,7 +92,7 @@ class ApplicationDAL(DAL):
     ) -> ApplicationStatusCurrent:
         query = select(ApplicationStatusCurrent).where(ApplicationStatusCurrent.application_id == application_id)
         res = await self.db_session.execute(query)
-        status = self.db_session.fetchone()
+        status = res.fetchone()
         if status is not None:
             return status[0]
     
