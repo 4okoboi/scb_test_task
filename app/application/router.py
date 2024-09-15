@@ -69,7 +69,7 @@ async def _update_status(
     application_id: int,
     status: str,
     db_session: AsyncSession
-) -> schemas.AfterApplicationCreated:
+) -> schemas.ShowApplicationStatus:
     async with db_session.begin():
         application_dal = ApplicationDAL(db_session)
         application_to_update = application_dal.get_application_by_id(
@@ -175,11 +175,11 @@ async def update_application(
 ) -> schemas.AfterApplicationCreated:
     pass
 
-@application_router.patch("/status/mark_as_done", response_model=schemas.AfterApplicationCreated)
+@application_router.patch("/status/mark_as_done", response_model=schemas.ShowApplicationStatus)
 async def status_mark_as_done(
     application_id: int,
     db_session: AsyncSession = Depends(get_async_session)
-) -> schemas.AfterApplicationCreated:
+) -> schemas.ShowApplicationStatus:
     return await _update_status(
         application_id=application_id,
         status="Done",
@@ -187,11 +187,11 @@ async def status_mark_as_done(
     )
 
 
-@application_router.patch("/status/mark_as_cancelled", response_model=schemas.AfterApplicationCreated)
+@application_router.patch("/status/mark_as_cancelled", response_model=schemas.ShowApplicationStatus)
 async def status_mark_as_cancelled(
     application_id: int,
     db_session: AsyncSession = Depends(get_async_session)
-) -> schemas.AfterApplicationCreated:
+) -> schemas.ShowApplicationStatus:
     return await _update_status(
         application_id=application_id,
         status="Cancelled",
@@ -199,22 +199,22 @@ async def status_mark_as_cancelled(
     )
 
 
-@application_router.patch("/status/mark_as_handed_to_courier", response_model=schemas.AfterApplicationCreated)
+@application_router.patch("/status/mark_as_handed_to_courier", response_model=schemas.ShowApplicationStatus)
 async def status_mark_as_handed_to_courier(
     application_id: int,
     db_session: AsyncSession = Depends(get_async_session)
-) -> schemas.AfterApplicationCreated:
+) -> schemas.ShowApplicationStatus:
     return await _update_status(
         application_id=application_id,
         status="Handed to courier",
         db_session=db_session
     )
 
-@application_router.patch("/status/mark_as_in_progress", response_model=schemas.AfterApplicationCreated)
+@application_router.patch("/status/mark_as_in_progress", response_model=schemas.ShowApplicationStatus)
 async def status_mark_as_in_progress(
     application_id: int,
     db_session: AsyncSession = Depends(get_async_session)
-) -> schemas.AfterApplicationCreated:
+) -> schemas.ShowApplicationStatus:
     return await _update_status(
         application_id=application_id,
         status="In progress",
