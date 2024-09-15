@@ -31,6 +31,8 @@ class ApplicationDAL(DAL):
             comment=comment
         )
         self.db_session.add(new_application)
+        await self.db_session.flush()
+        # TODO: переделать под триггеры
         application_status = ApplicationStatusCurrent(
             application_id=new_application.id_,
             status="New"
