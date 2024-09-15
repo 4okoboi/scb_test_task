@@ -13,7 +13,7 @@ class CreateApplication(BaseModel):
     comment: Optional[str] = Field(None)
     
     @field_validator('ship_time')
-    def validate_ship_datetime(cls, v, values):
+    def validate_ship_datetime(cls, v, info):
         ship_date = info.data.get('ship_date')
         ship_datetime = datetime.combine(ship_date, v)
         current_datetime = datetime.now()
