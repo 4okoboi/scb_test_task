@@ -39,7 +39,7 @@ async def _create_application(
                 details="Посылки типа 'Габаритный груз' доставляются только по Казани"
             )
         
-        application_id = await application_dal.create_application(
+        application = await application_dal.create_application(
             city=body.city,
             ship_address=ship_address,
             warehouse_id=nearest_warehouse.Warehouse.id_,
@@ -52,7 +52,7 @@ async def _create_application(
         )
         
         return schemas.AfterApplicationCreated(
-            application_id=application_id
+            application_id=application.id_
         )
     
 
