@@ -55,3 +55,13 @@ class WarehouseDAL(DAL):
         warehouse_address = res.fetchone()
         if warehouse_address is not None:
             return warehouse_address[0]
+        
+    async def get_warehouse_by_id(
+        self,
+        warehouse_id: int
+    ) -> Warehouse:
+        query = select(Warehouse).where(Warehouse.id_ == warehouse_id)
+        res = await self.db_session.execute(query)
+        warehouse = res.fetchone()
+        if warehouse is not None:
+            return warehouse[0]

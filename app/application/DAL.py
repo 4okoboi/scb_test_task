@@ -56,7 +56,7 @@ class ApplicationDAL(DAL):
         application_id: int,
         **kwargs
     ) -> Union[int, None]:
-        query = update(Application).where(Application.id_ == application_id).returning(Application.id_)
+        query = update(Application).where(Application.id_ == application_id).values(kwargs).returning(Application.id_)
         res = await self.db_session.execute(query)
         updated_application_id = res.fetchone()
         if updated_application_id is not None:

@@ -44,7 +44,7 @@ class ShowApplicationStatus(BaseModel):
 
     
 class UpdateApplication(BaseModel):
-    city: str
+    city: Optional[str] = Field(None)
     ship_address: Optional[str] = Field(None)
     package_type_id: Optional[str] = Field(None)
     ship_date: Optional[date] = Field(None)
@@ -58,4 +58,14 @@ class UpdateApplication(BaseModel):
         current_datetime = datetime.now()
         if ship_datetime < current_datetime:
             raise ValueError('Shipping date and time cannot be in the past.')
+        return v
+    
+    @field_validator('city', 'ship_address', pre=True, always=True)
+    def validate_city_address(cls, v, values, field):
+        city = values.get('city')
+        ship_address = values.get('ship_address')
+
+        if field.name == 'city' and v and not ship_address:
+            raise ValueError('City can only be changed along with the address.')
+
         return v
