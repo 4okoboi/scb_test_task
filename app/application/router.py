@@ -123,7 +123,7 @@ async def _show_application(
             package_type_id=application.package_type_id,
             distance=application.distance,
             comment=application.comment,
-            status=status
+            status=status.status
         )
 
 @application_router.post("", response_model=schemas.AfterApplicationCreated)
