@@ -236,7 +236,8 @@ async def create_application(
 async def update_application(
     application_id: int,
     body: schemas.UpdateApplication,
-    db_session: AsyncSession = Depends(get_async_session)
+    db_session: AsyncSession = Depends(get_async_session),
+    current_user: User = Depends(get_current_user_from_token)
 ) -> schemas.AfterApplicationCreated:
     updated_application_params = body.dict(exclude_none=True)
     if updated_application_params == {}:
@@ -248,6 +249,8 @@ async def update_application(
         updated_application_id = await _update_application(
             application_id=application_id,
             update_application_parameters=updated_application_params,
+            client_address=current_user.actual_address,
+            client_id=current_user.id,
             db_session=db_session
         )
     except Exception as err:
