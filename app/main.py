@@ -3,6 +3,7 @@ from app.warehouse.router import warehouse_router
 from app.auth.handlers import user_router
 from app.auth.login_handler import login_router
 from app.application.router import application_router
+from initializer import Initializer
 
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,6 +13,8 @@ import uvicorn
 app = FastAPI(
     title="SCB_TEST_TASK"
 )
+
+Initializer()
 
 # app.add_middleware(
 #     CORSMiddleware,

@@ -2,7 +2,7 @@ import requests
 import time
 
 def make_requests():
-    time.sleep(10)  # Задержка в 10 секунд
+    time.sleep(10)
 
     payload_admin = {
             "username": "test_admin",
