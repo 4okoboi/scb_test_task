@@ -1,12 +1,13 @@
 import requests
+import time
+
+time.sleep(10)  # Задержка в 10 секунд
 
 payload_admin = {
         "username": "test_admin",
         "email": "admin@test.ru",
         "password": "test"
     }
-
-
 
 
 requests.post(
