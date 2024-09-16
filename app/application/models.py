@@ -17,7 +17,7 @@ class Application(Base):
     
     city = Column("city", String, nullable=False)
     warehouse_id = Column("warehouse_id", Integer, ForeignKey("warehouse.id", ondelete="CASCADE"))
-    addresss = Column("address", String, nullable=False)
+    address = Column("address", String, nullable=False)
     client_id = Column("client_id", ForeignKey("user.id", ondelete="CASCADE"))
     distance = Column("distance", Integer, nullable=False)
     ship_date = Column("ship_date", Date, nullable=False)

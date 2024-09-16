@@ -201,7 +201,7 @@ async def _show_application(
         return schemas.ShowApplication(
             application_id=application.id_,
             city=application.city,
-            ship_address=application.addresss,
+            ship_address=application.address,
             warehouse_address=warehouse_address,
             ship_date=application.ship_date,
             ship_time=application.ship_time,
