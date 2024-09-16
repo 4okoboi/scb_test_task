@@ -40,6 +40,12 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['warehouse_id'], ['warehouse.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
+    op.execute("""
+    INSERT INTO package_type (id, type) VALUES
+    (1, 'Письмо'),
+    (2, 'Бандероль'),
+    (3, 'Габаритный груз');
+    """)
     # ### end Alembic commands ###
 
 

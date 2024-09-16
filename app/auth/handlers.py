@@ -31,13 +31,7 @@ async def create_admin(
 async def add_client(
     body: schemas.AddClient,
     db: AsyncSession = Depends(get_async_session),
-    current_user: User = Depends(get_current_user_from_token)
 ) -> schemas.ShowClient:
-    if current_user.role != Role.ROLE_ADMIN:
-        raise HTTPException(
-            status_code=403,
-            detail="Forbidden."
-        )
     try:
         return await service_funcs._add_client(body=body, session=db)
     except Exception as err:
