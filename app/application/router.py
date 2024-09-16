@@ -243,19 +243,19 @@ async def update_application(
             status_code=422,
             detail="At least one parameter for application update info should be provided"
         )
-    try:
-        updated_application_id = await _update_application(
-            application_id=application_id,
-            update_application_parameters=updated_application_params,
-            client_address=current_user.actual_address,
-            client_id=current_user.id,
-            db_session=db_session
-        )
-    except Exception as err:
-        raise HTTPException(
-            status_code=503,
-            detail=f"Db error, {str(err)}"
-        )
+    # try:
+    updated_application_id = await _update_application(
+        application_id=application_id,
+        update_application_parameters=updated_application_params,
+        client_address=current_user.actual_address,
+        client_id=current_user.id,
+        db_session=db_session
+    )
+    # except Exception as err:
+    #     raise HTTPException(
+    #         status_code=503,
+    #         detail=f"Db error, {str(err)}"
+    #     )
     return schemas.AfterApplicationCreated(
         application_id=updated_application_id
     )
