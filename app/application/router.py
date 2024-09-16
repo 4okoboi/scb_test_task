@@ -92,11 +92,11 @@ async def _update_application(
                         status_code=400,
                         detail="Посылки типа 'Габаритный груз' доставляются только по Казани"
                     )
-        if "city" in update_application_parameters and "ship_address" in update_application_parameters:
+        if "city" in update_application_parameters and "address" in update_application_parameters:
             city = update_application_parameters["city"].capitalize()
-            ship_address = update_application_parameters["ship_address"]
+            ship_address = update_application_parameters["address"]
             ship_address, ship_lat, ship_lon = await get_valid_address_and_coords(address=ship_address + ", " + city)
-            update_application_parameters["ship_address"] = ship_address
+            update_application_parameters["address"] = ship_address
             _, client_lat, client_lon = await get_valid_address_and_coords(address=client_address)
             nearest_warehouse = await warehouse_dal.get_nearest_warehouse_in_city(city=city, client_coords=(client_lat, client_lon))
             update_application_parameters["warehouse_id"] = nearest_warehouse.Warehouse.id_
@@ -122,11 +122,11 @@ async def _update_application(
                         status_code=400,
                         detail="Посылки типа 'Габаритный груз' доставляются только по Казани"
                     )
-        elif "ship_address" in update_application_parameters:
+        elif "address" in update_application_parameters:
             city = application_to_update.city
-            ship_address = update_application_parameters["ship_address"]
+            ship_address = update_application_parameters["address"]
             ship_address, ship_lat, ship_lon = await get_valid_address_and_coords(address=ship_address + ", " + city)
-            update_application_parameters["ship_address"] = ship_address
+            update_application_parameters["address"] = ship_address
             warehouse = await warehouse_dal.get_warehouse_by_id(
                 warehouse_id=application_to_update.warehouse_id
             )

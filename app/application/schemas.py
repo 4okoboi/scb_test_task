@@ -44,7 +44,7 @@ class ShowApplicationStatus(BaseModel):
     
 class UpdateApplication(BaseModel):
     city: Optional[str] = Field(None)
-    ship_address: Optional[str] = Field(None)
+    address: Optional[str] = Field(None)
     package_type_id: Optional[int] = Field(None)
     ship_date: Optional[date] = Field(None)
     ship_time: Optional[time] = Field(None)
@@ -62,7 +62,7 @@ class UpdateApplication(BaseModel):
     @model_validator(mode='before')
     def check_city_and_address(cls, values):
         city = values.get('city')
-        address = values.get('ship_address')
+        address = values.get('address')
         if city and not address:
             raise ValueError('City can only be changed with the address.')
         return values
