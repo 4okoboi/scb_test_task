@@ -285,13 +285,6 @@ async def show_application_status(
     )
 
 
-@application_router.patch("", response_model=schemas.AfterApplicationCreated)
-async def update_application(
-    application_id: int,
-    body: schemas.UpdateApplication,
-    db_session: AsyncSession = Depends(get_async_session)
-) -> schemas.AfterApplicationCreated:
-    pass
 
 @application_router.patch("/status/mark_as_done", response_model=schemas.ShowApplicationStatus)
 async def status_mark_as_done(
