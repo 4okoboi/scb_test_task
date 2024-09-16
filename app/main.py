@@ -14,7 +14,6 @@ app = FastAPI(
     title="SCB_TEST_TASK"
 )
 
-Initializer()
 
 # app.add_middleware(
 #     CORSMiddleware,
@@ -31,8 +30,8 @@ main_router.include_router(warehouse_router, prefix="/warehouse", tags=["warehou
 main_router.include_router(user_router, prefix="/user", tags=["user"])
 main_router.include_router(login_router, prefix="/login", tags=["login"])
 main_router.include_router(application_router, prefix="/application", tags=["application"])
-
 app.include_router(main_router)
+Initializer()
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
