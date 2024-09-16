@@ -140,9 +140,7 @@ async def _update_application(
             application_id=application_id,
             **update_application_parameters
         )
-        return schemas.AfterApplicationCreated(
-            application_id=updated_application_id
-        )
+        return updated_application_id
 
             
 async def _update_status(
@@ -283,8 +281,6 @@ async def show_application_status(
         application_id=application_id,
         db_session=db_session
     )
-
-
 
 @application_router.patch("/status/mark_as_done", response_model=schemas.ShowApplicationStatus)
 async def status_mark_as_done(
