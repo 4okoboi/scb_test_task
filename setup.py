@@ -26,3 +26,5 @@ requests.post(
     url="http://localhost:8000/user/client",
     json=payload_client
 )
+
+exit(code=20)
