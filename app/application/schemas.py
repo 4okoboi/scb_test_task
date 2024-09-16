@@ -45,7 +45,7 @@ class ShowApplicationStatus(BaseModel):
 class UpdateApplication(BaseModel):
     city: Optional[str] = Field(None)
     ship_address: Optional[str] = Field(None)
-    package_type_id: Optional[str] = Field(None)
+    package_type_id: Optional[int] = Field(None)
     ship_date: Optional[date] = Field(None)
     ship_time: Optional[time] = Field(None)
     comment: Optional[str] = Field(None)
