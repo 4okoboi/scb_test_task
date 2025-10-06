@@ -1,0 +1,14 @@
+fastapi==0.114.1
+sqlalchemy==2.0.34
+psycopg2==2.9.9
+asyncpg==0.29.0
+dadata==21.10.1
+python-dotenv==1.0.1
+uvicorn==0.30.6
+gunicorn==23.0.0
+alembic==1.13.2
+passlib==1.7.4
+python-jose==3.3.0
+pydantic[email]==2.9.1
+python-multipart==0.0.9
+requests==2.32.3

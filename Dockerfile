@@ -1,14 +1,14 @@
 FROM python:3.12
 
-RUN mkdir /backend
-
 WORKDIR /backend
 
-RUN pip install poetry
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
-COPY pyproject.toml poetry.lock* /backend/
+COPY requirements.txt /backend/
 
-RUN poetry config virtualenvs.create false && poetry install --no-dev --no-interaction --no-ansi
+RUN pip install --upgrade pip \
+    && pip install -r requirements.txt 
 
 COPY . .
 
