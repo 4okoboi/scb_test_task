@@ -1,0 +1,78 @@
+service:
+  type: ClusterIP
+  ports:
+    name: pg
+    port: 5432
+    targetPort: 5432
+    protocol: TCP
+
+config:
+  APP_ENV: "local"
+  GUNICORN_BIND: "0.0.0.0:8000"
+  GUNICORN_WORKERS: "2"
+  AUTH_ACCESS_TOKEN_EXPIRE_MINUTES: "120"
+  AUTH_ALGORITHM: "HS256"
+
+secret:
+  POSTGRES_PASS: somepass
+  POSTGRES_USER: user
+  POSTGRES_DB: appdb
+  DADATA_API_KEY: NjM3MDg4Mjg5ZGJmYTlhNzQxYTIwYmI2ZGU4Y2JjMDBjYzNlN2I3ZQ==
+  AUTH_SECRET_KEY: MDcwa3BmNnJtZ21p
+
+statefulset:
+  replicas: 1
+  image:
+    name: postgres
+    tag: "15"
+    pullPolicy: IfNotPresent
+  env:
+    secret:
+      POSTGRES_USER: POSTGRES_USER
+      POSTGRES_PASS: POSTGRES_PASS
+      POSTGRES_DB: POSTGRES_DB
+    config: {}
+
+pvc:
+  name: pvc-postgres
+  volumeName: pgdata
+  mountPath: /var/lib/postgresql/data
+  subPath: data
+  accessModes: ReadWriteOnce
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: 2Gi
+
+pv:
+  name: pv-postgres
+  capacity:
+    storage: 2Gi
+  accessModes: ReadWriteOnce
+  storageClassName: local-storage
+  hostPath:
+    path: /data/minikube-postgres
+    type: DirectoryOrCreate
+
+migrate:
+  backoffLimit: 1
+  restartPolicy: Never
+  image:
+    name: "backend"
+    tag: "0.5"
+    pullPolicy: IfNotPresent
+  env:
+    config:
+      APP_ENV: APP_ENV
+      GUNICORN_WORKERS: GUNICORN_WORKERS
+      GUNICORN_BIND: GUNICORN_BIND
+      POSTGRES_HOST: POSTGRES_HOST
+      POSTGRES_PORT: POSTGRES_PORT
+      AUTH_ALGORITHM: AUTH_ALGORITHM
+      AUTH_ACCESS_TOKEN_EXPIRE_MINUTES: AUTH_ACCESS_TOKEN_EXPIRE_MINUTES
+    secret:
+      POSTGRES_USER: POSTGRES_USER
+      POSTGRES_PASS: POSTGRES_PASS
+      POSTGRES_DB: POSTGRES_DB
+      AUTH_SECRET_KEY: AUTH_SECRET_KEY
+      DADATA_API_KEY: DADATA_API_KEY

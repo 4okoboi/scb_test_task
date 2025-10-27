@@ -1,0 +1,64 @@
+config:
+  GUNICORN_WORKERS: "2"
+  GUNICORN_BIND: "0.0.0.0:8000"
+
+#secret:
+#  POSTGRES_PASS: somepass
+#  POSTGRES_USER: user
+#  POSTGRES_DB: appdb
+#  DADATA_API_KEY: NjM3MDg4Mjg5ZGJmYTlhNzQxYTIwYmI2ZGU4Y2JjMDBjYzNlN2I3ZQ==
+#  AUTH_SECRET_KEY: MDcwa3BmNnJtZ21p
+
+service:
+  type: ClusterIP
+  ports:
+    name: http
+    port: 80
+    targetPort: 8000
+
+deployment:
+  replicas: 1
+  name: backend
+  image:
+    name: "backend"
+    tag: "0.5"
+    pullPolicy: IfNotPresent
+  ports:
+    name: http
+    containerPort: 8000
+  postgres:
+    name: postgres
+    namespace: postgres-release
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+  probes:
+    readiness:
+      path: "/docs"
+      port: "8000"
+      initialDelaySeconds: 10
+      periodSeconds: 5
+    liveness:
+      path: "/docs"
+      port: "8000"
+      initialDelaySeconds: 20
+      periodSeconds: 10
+  env:
+    config:
+      APP_ENV: APP_ENV
+      GUNICORN_WORKERS: GUNICORN_WORKERS
+      GUNICORN_BIND: GUNICORN_BIND
+      POSTGRES_HOST: POSTGRES_HOST
+      POSTGRES_PORT: POSTGRES_PORT
+      AUTH_ALGORITHM: AUTH_ALGORITHM
+      AUTH_ACCESS_TOKEN_EXPIRE_MINUTES: AUTH_ACCESS_TOKEN_EXPIRE_MINUTES
+    secret:
+      POSTGRES_USER: POSTGRES_USER
+      POSTGRES_PASS: POSTGRES_PASS
+      POSTGRES_DB: POSTGRES_DB
+      AUTH_SECRET_KEY: AUTH_SECRET_KEY
+      DADATA_API_KEY: DADATA_API_KEY

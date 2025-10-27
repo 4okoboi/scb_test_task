@@ -1,0 +1,16 @@
+global:
+  secret:
+    name: db-secrets
+  config:
+    name: db-config
+  services:
+    backend: backend-service
+    postgres: postgres-service
+
+
+ingress:
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+  host: app.local
+  tls:
+    secretName: app-tls

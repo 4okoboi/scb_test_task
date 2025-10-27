@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.pv.name }}
+  labels:
+{{ include "postgres.labels" . | indent 4 }}
+spec:
+  capacity:
+    storage: {{ .Values.pv.capacity.storage | quote }}
+  accessModes:
+    - {{ .Values.pv.accessModes | quote }}
+  storageClassName: {{ .Values.pv.storageClassName }}
+  hostPath:
+    path: {{ .Values.pv.hostPath.path }}
+    type: {{ .Values.pv.hostPath.type }}

@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Chart.Name }}-statefulset
+  labels:
+{{ include "postgres.labels" . | indent 4 }}
+spec:
+  serviceName: {{ .Chart.Name }}-service
+  replicas: {{ .Values.statefulset.replicas }}
+  selector:
+    matchLabels:
+{{ include "postgres.selectorLabels" . | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{ include "postgres.selectorLabels" . | indent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.statefulset.image }}
+          image: {{ printf "%s:%s" .name .tag }}
+          imagePullPolicy: {{ .pullPolicy | quote }}
+          {{- end }}
+          ports:
+          {{- with .Values.service.ports }}
+            - containerPort: {{ .port }}
+              name: {{ .name }}
+              protocol: {{ .protocol }}
+          {{- end }}
+          env:
+            {{- range $key, $val := .Values.statefulset.env.secret }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postgres.secretsName" $ }}
+                  key: {{ $val }}
+            {{- end }}
+            {{- range $key, $val := .Values.statefulset.env.config }}
+              - name: {{ $key }}
+                valueFrom:
+                  configMapKeyRef:
+                    name: {{ include "postgres.configMapName" $ }}
+                    key: {{ $val }}
+            {{- end }}
+          volumeMounts:
+            - name: {{ .Values.pvc.volumeName }}
+              mountPath: {{ .Values.pvc.mountPath }}
+              subPath: {{ .Values.pvc.subPath }}
+      volumes:
+        - name: {{ .Values.pvc.volumeName }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.pvc.name }}
+

@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: alembic-migrate
+  labels:
+{{ include "postgres.labels" . | indent 4 }}
+spec:
+  {{- with .Values.migrate }}
+  backoffLimit: {{ .backoffLimit }}
+  template:
+    spec:
+      restartPolicy: {{ .restartPolicy }}
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.36.1
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for postgres..."
+                until nc -zv {{ $.Values.global.services.postgres }}.app.svc.cluster.local 5432; do
+                sleep 1
+              done
+              echo "Postgres is up"
+      containers:
+        - name: migrate
+          image: {{ printf "%s:%s" .image.name .image.tag }}
+          imagePullPolicy: {{ .image.pullPolicy }}
+          env:
+            {{- range $key, $val := .env.secret }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postgres.secretsName" $ }}
+                  key: {{ $val }}
+            {{- end }}
+            {{- range $key, $val := .env.config }}
+            - name: {{ $key }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "postgres.configMapName" $ }}
+                  key: {{ $val }}
+            {{- end }}
+          command:
+            - sh
+            - -c
+            - |
+              echo "Running alembic upgrade head..."
+              alembic upgrade head
+              echo "Done."
+  {{- end }}
