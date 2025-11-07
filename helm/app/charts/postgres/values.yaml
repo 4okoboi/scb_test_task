@@ -13,13 +13,6 @@ config:
   AUTH_ACCESS_TOKEN_EXPIRE_MINUTES: "120"
   AUTH_ALGORITHM: "HS256"
 
-secret:
-  POSTGRES_PASS: somepass
-  POSTGRES_USER: user
-  POSTGRES_DB: appdb
-  DADATA_API_KEY: NjM3MDg4Mjg5ZGJmYTlhNzQxYTIwYmI2ZGU4Y2JjMDBjYzNlN2I3ZQ==
-  AUTH_SECRET_KEY: MDcwa3BmNnJtZ21p
-
 statefulset:
   replicas: 1
   image:

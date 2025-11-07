@@ -2,13 +2,6 @@ config:
   GUNICORN_WORKERS: "2"
   GUNICORN_BIND: "0.0.0.0:8000"
 
-#secret:
-#  POSTGRES_PASS: somepass
-#  POSTGRES_USER: user
-#  POSTGRES_DB: appdb
-#  DADATA_API_KEY: NjM3MDg4Mjg5ZGJmYTlhNzQxYTIwYmI2ZGU4Y2JjMDBjYzNlN2I3ZQ==
-#  AUTH_SECRET_KEY: MDcwa3BmNnJtZ21p
-
 service:
   type: ClusterIP
   ports:

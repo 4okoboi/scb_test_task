@@ -7,7 +7,6 @@ metadata:
 data:
   POSTGRES_HOST: {{ $.Values.global.services.postgres }}.app.svc.cluster.local
   POSTGRES_PORT: {{ .Values.service.ports.port | quote }}
-  POSTGRES_DB: {{ .Values.secret.POSTGRES_DB | quote }}
   {{- range $key, $val := .Values.config }}
   {{ $key }}: {{ $val | quote }}
   {{- end }}
