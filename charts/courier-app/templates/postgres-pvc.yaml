@@ -1,0 +1,23 @@
+{{- if and .Values.postgres.enabled .Values.postgres.persistence.enabled (not .Values.postgres.persistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "courier-app.postgres.pvcName" . }}
+  namespace: {{ include "courier-app.namespace" . }}
+  labels:
+    {{- include "courier-app.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    {{- range .Values.postgres.persistence.accessModes }}
+    - {{ . }}
+    {{- end }}
+  storageClassName: {{ .Values.postgres.persistence.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.postgres.persistence.size }}
+  {{- with .Values.postgres.persistence.selector }}
+  selector:
+    matchLabels:
+      {{- toYaml . | nindent 6 }}
+  {{- end }}
+{{- end }}

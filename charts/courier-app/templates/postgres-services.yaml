@@ -1,0 +1,34 @@
+{{- if .Values.postgres.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "courier-app.postgres.fullname" . }}
+  namespace: {{ include "courier-app.namespace" . }}
+  labels:
+    {{- include "courier-app.labels" . | nindent 4 }}
+spec:
+  selector:
+    app.kubernetes.io/name: {{ include "courier-app.postgres.fullname" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - name: pg
+      port: {{ .Values.postgres.service.port }}
+      targetPort: {{ .Values.postgres.service.port }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "courier-app.postgres.headless" . }}
+  namespace: {{ include "courier-app.namespace" . }}
+  labels:
+    {{- include "courier-app.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: {{ include "courier-app.postgres.fullname" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - name: pg
+      port: {{ .Values.postgres.service.port }}
+      targetPort: {{ .Values.postgres.service.port }}
+{{- end }}

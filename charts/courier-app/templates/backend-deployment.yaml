@@ -1,0 +1,161 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "courier-app.backend.fullname" . }}
+  namespace: {{ include "courier-app.namespace" . }}
+  labels:
+    {{- include "courier-app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "courier-app.backend.fullname" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "courier-app.backend.fullname" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- with .Values.backend.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.backend.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- if .Values.backend.serviceAccountName }}
+      serviceAccountName: {{ .Values.backend.serviceAccountName }}
+      {{- end }}
+      {{- if .Values.backend.initContainers.waitForPostgres }}
+      initContainers:
+        - name: wait-for-postgres
+          image: {{ .Values.backend.initContainers.waitForPostgres.image }}
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for postgres..."
+              until nc -zv {{ include "courier-app.postgres.waitServiceFQDN" . }} {{ .Values.backend.initContainers.waitForPostgres.port }}; do
+                sleep 1
+              done
+              echo "Postgres is up"
+      {{- end }}
+      containers:
+        - name: backend
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          env:
+            - name: APP_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-config
+                  key: APP_ENV
+            - name: GUNICORN_WORKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-config
+                  key: GUNICORN_WORKERS
+            - name: GUNICORN_BIND
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-config
+                  key: GUNICORN_BIND
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-config
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-config
+                  key: POSTGRES_HOST
+            - name: POSTGRES_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-config
+                  key: POSTGRES_PORT
+            - name: AUTH_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-secret
+                  key: AUTH_SECRET_KEY
+            - name: AUTH_ALGORITHM
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-config
+                  key: AUTH_ALGORITHM
+            - name: AUTH_ACCESS_TOKEN_EXPIRE_MINUTES
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-config
+                  key: AUTH_ACCESS_TOKEN_EXPIRE_MINUTES
+            {{- if .Values.secrets.dadataApiKey }}
+            - name: DADATA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-secret
+                  key: DADATA_API_KEY
+            {{- end }}
+            {{- with .Values.backend.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.backend.extraEnvFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.backend.service.targetPort }}
+          {{- if .Values.backend.gunicornCommandEnabled }}
+          command:
+            - sh
+            - -c
+          args:
+            - |
+              gunicorn app.main:app --workers ${GUNICORN_WORKERS} --worker-class uvicorn.workers.UvicornWorker --bind=${GUNICORN_BIND}
+          {{- else if .Values.backend.command }}
+          command:
+            {{- toYaml .Values.backend.command | nindent 12 }}
+          {{- end }}
+          {{- if and (not .Values.backend.gunicornCommandEnabled) .Values.backend.args }}
+          args:
+            {{- toYaml .Values.backend.args | nindent 12 }}
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.backend.livenessProbe.path }}
+              port: {{ .Values.backend.livenessProbe.port }}
+            initialDelaySeconds: {{ .Values.backend.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.backend.livenessProbe.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.backend.readinessProbe.path }}
+              port: {{ .Values.backend.readinessProbe.port }}
+            initialDelaySeconds: {{ .Values.backend.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.backend.readinessProbe.periodSeconds }}
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
+      {{- with .Values.backend.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

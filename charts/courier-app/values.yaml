@@ -1,0 +1,113 @@
+nameOverride: ""
+fullnameOverride: ""
+
+namespace:
+  create: false
+  name: ""
+
+config:
+  appEnv: "local"
+  gunicorn:
+    workers: 2
+    bind: "0.0.0.0:8000"
+  auth:
+    algorithm: "HS256"
+    accessTokenExpireMinutes: 120
+  postgres:
+    host: ""
+    port: 5432
+    database: "appdb"
+
+secrets:
+  postgres:
+    user: "dbuser"
+    password: "dbpassword"
+  auth:
+    secretKey: "change-me"
+  dadataApiKey: ""
+
+backend:
+  replicaCount: 1
+  image:
+    repository: backend
+    tag: "0.4"
+    pullPolicy: IfNotPresent
+  serviceAccountName: ""
+  podAnnotations: {}
+  podLabels: {}
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  livenessProbe:
+    path: /docs
+    port: 8000
+    initialDelaySeconds: 20
+    periodSeconds: 10
+  readinessProbe:
+    path: /docs
+    port: 8000
+    initialDelaySeconds: 10
+    periodSeconds: 5
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  env: []
+  extraEnvFrom: []
+  command: []
+  args: []
+  gunicornCommandEnabled: true
+  initContainers:
+    waitForPostgres:
+      image: busybox:1.36.1
+      port: 5432
+  migrationJob:
+    enabled: true
+
+postgres:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: postgres
+    tag: "15"
+    pullPolicy: IfNotPresent
+  service:
+    port: 5432
+  persistence:
+    enabled: true
+    existingClaim: ""
+    size: 2Gi
+    storageClass: "local-storage"
+    accessModes:
+      - ReadWriteOnce
+    selector:
+      type: local
+    hostPath:
+      enabled: true
+      path: /data/minikube-postgres
+  resources: {}
+
+migrationJob:
+  annotations: {}
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+  hosts:
+    - host: app.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - app.local
+      secretName: app-tls
