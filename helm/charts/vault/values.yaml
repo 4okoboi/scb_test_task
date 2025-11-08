@@ -1,0 +1,51 @@
+fullnameOverride: ""
+nameOverride: ""
+
+global:
+  namespace: vault
+
+server:
+  replicas: 1
+  image:
+    repository: hashicorp/vault
+    tag: "1.14.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8200
+    annotations: {}
+  config: |
+    listener "tcp" {
+      address     = "0.0.0.0:8200"
+      tls_disable = 1
+    }
+    disable_mlock = true
+    ui = true
+  extraEnvironmentVars: {}
+  resources: {}
+  podAnnotations: {}
+  podLabels: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  storage:
+    enabled: true
+    size: 5Gi
+    storageClassName: local-storage
+    accessMode: ReadWriteOnce
+    annotations: {}
+    mountPath: /vault/data
+
+ui:
+  enabled: true
+
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+  hosts:
+    - host: vault.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: postgres
+version: 0.1.0
+description: Minimal PostgreSQL deployment for development
+appVersion: "15"
+type: application

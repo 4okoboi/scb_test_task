@@ -1,0 +1,59 @@
+{{- if .Values.migrations.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ printf "%s-migrate" (include "scb-app.fullname" .) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "scb-app.labels" . | nindent 4 }}
+  {{- with .Values.migrations.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  backoffLimit: {{ .Values.migrations.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        {{- include "scb-app.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      {{- if and .Values.enableDefaultInitContainers .Values.initContainers.waitForPostgres.enabled }}
+      initContainers:
+        - name: wait-for-postgres
+          image: {{ .Values.initContainers.waitForPostgres.image }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_HOST
+              value: {{ default (include "scb-app.postgresServiceHost" .) .Values.initContainers.waitForPostgres.host | quote }}
+            - name: POSTGRES_PORT
+              value: {{ default (printf "%v" .Values.postgres.service.port) .Values.initContainers.waitForPostgres.port | quote }}
+          command:
+            {{- toYaml .Values.initContainers.waitForPostgres.command | nindent 12 }}
+      {{- end }}
+      containers:
+        - name: migrate
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            {{- toYaml .Values.migrations.args | nindent 12 }}
+          env:
+            {{- range $index, $key := .Values.env.configKeys }}
+            - name: {{ $key }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "scb-app.configMapName" $ }}
+                  key: {{ $key }}
+            {{- end }}
+            {{- range $index, $key := .Values.env.secretKeys }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "scb-app.secretName" $ }}
+                  key: {{ $key }}
+            {{- end }}
+            {{- range .Values.migrations.extraEnv }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+{{- end }}

@@ -1,0 +1,19 @@
+apiVersion: v2
+name: scb-app
+version: 0.1.0
+appVersion: "0.4.0"
+description: Helm chart for SCB backend application with PostgreSQL and Vault integration
+home: https://example.com/scb-app
+maintainers:
+  - name: DevOps Team
+    email: devops@example.com
+type: application
+dependencies:
+  - name: postgres
+    version: 0.1.0
+    repository: "file://./charts/postgres"
+    condition: postgres.enabled
+  - name: vault
+    version: 0.1.0
+    repository: "file://./charts/vault"
+    condition: vault.enabled

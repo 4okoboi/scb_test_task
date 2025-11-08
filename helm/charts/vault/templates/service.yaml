@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "vault.fullname" . }}
+  namespace: {{ include "vault.namespace" . }}
+  labels:
+    {{- include "vault.labels" . | nindent 4 }}
+  {{- with .Values.server.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.server.service.type }}
+  selector:
+    {{- include "vault.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: api
+      port: {{ .Values.server.service.port }}
+      targetPort: {{ .Values.server.service.port }}
+      protocol: TCP
