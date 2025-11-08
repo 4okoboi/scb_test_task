@@ -1,0 +1,22 @@
+{{- if .Values.config.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "scb-app.configMapName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "scb-app.labels" . | nindent 4 }}
+data:
+  {{- $config := dict }}
+  {{- range $key, $val := .Values.config.data }}
+  {{- $value := $val }}
+  {{- if and (eq $key "POSTGRES_HOST") (not $val) }}
+  {{- $value = include "scb-app.postgresReadWriteHost" $ }}
+  {{- end }}
+  {{- if and (eq $key "POSTGRES_PORT") (not $val) }}
+  {{- $value = printf "%v" $.Values.postgres.service.port }}
+  {{- end }}
+  {{- $_ := set $config $key (printf "%v" $value) }}
+  {{- end }}
+{{ toYaml $config | nindent 2 }}
+{{- end }}

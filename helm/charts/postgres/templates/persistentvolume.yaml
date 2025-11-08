@@ -1,0 +1,19 @@
+{{- if and .Values.persistence.enabled .Values.persistence.hostPath }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ default (printf "%s-pv" (include "postgres.fullname" .)) .Values.persistence.volumeName }}
+  labels:
+    {{- include "postgres.labels" . | nindent 4 }}
+spec:
+  capacity:
+    storage: {{ .Values.persistence.size }}
+  accessModes:
+    {{- toYaml .Values.persistence.accessModes | nindent 4 }}
+  {{- if .Values.persistence.storageClassName }}
+  storageClassName: {{ .Values.persistence.storageClassName }}
+  {{- end }}
+  hostPath:
+    path: {{ .Values.persistence.hostPath }}
+    type: DirectoryOrCreate
+{{- end }}

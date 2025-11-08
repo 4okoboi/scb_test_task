@@ -1,0 +1,234 @@
+nameOverride: ""
+fullnameOverride: ""
+
+global:
+  database:
+    secretName: app-secret
+    userKey: POSTGRES_USER
+    passwordKey: POSTGRES_PASSWORD
+    dbName: appdb
+
+image:
+  repository: backend
+  tag: "0.4"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+replicaCount: 1
+
+enableDefaultInitContainers: true
+initContainers:
+  waitForPostgres:
+    enabled: true
+    image: busybox:1.36.1
+    host: ""
+    port: ""
+    command:
+      - sh
+      - -c
+      - |
+        echo "Waiting for postgres..."
+        until nc -zv ${POSTGRES_HOST} ${POSTGRES_PORT}; do
+          sleep 1
+        done
+        echo "Postgres is up"
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  name: ""
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+  annotations: {}
+
+config:
+  enabled: true
+  name: ""
+  data:
+    APP_ENV: "local"
+    GUNICORN_WORKERS: "2"
+    GUNICORN_BIND: "0.0.0.0:8000"
+    POSTGRES_HOST: ""
+    POSTGRES_PORT: ""
+    POSTGRES_DB: "appdb"
+    AUTH_ACCESS_TOKEN_EXPIRE_MINUTES: "120"
+    AUTH_ALGORITHM: "HS256"
+
+secret:
+  create: true
+  name: app-secret
+  existingSecret: ""
+  type: Opaque
+  stringData:
+    POSTGRES_USER: dbuser
+    POSTGRES_PASSWORD: dbpassword
+    AUTH_SECRET_KEY: supersecret
+    DADATA_API_KEY: changeme
+
+env:
+  extra: []
+  configKeys:
+    - APP_ENV
+    - GUNICORN_WORKERS
+    - GUNICORN_BIND
+    - POSTGRES_DB
+    - POSTGRES_HOST
+    - POSTGRES_PORT
+    - AUTH_ALGORITHM
+    - AUTH_ACCESS_TOKEN_EXPIRE_MINUTES
+  secretKeys:
+    - POSTGRES_USER
+    - POSTGRES_PASSWORD
+    - AUTH_SECRET_KEY
+    - DADATA_API_KEY
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+command:
+  - sh
+  - -c
+args:
+  - |
+    gunicorn app.main:app --workers ${GUNICORN_WORKERS} --worker-class uvicorn.workers.UvicornWorker --bind=${GUNICORN_BIND}
+
+ports:
+  - name: http
+    containerPort: 8000
+    protocol: TCP
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /docs
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 5
+
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /docs
+    port: http
+  initialDelaySeconds: 20
+  periodSeconds: 10
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+  hosts:
+    - host: app.local
+      paths:
+        - path: /
+          pathType: Prefix
+          servicePort: http
+  tls:
+    - secretName: app-tls
+      hosts:
+        - app.local
+
+migrations:
+  enabled: true
+  backoffLimit: 1
+  annotations: {}
+  extraEnv: []
+  args:
+    - sh
+    - -c
+    - |
+      echo "Running alembic upgrade head..."
+      alembic upgrade head
+      echo "Done."
+
+postgres:
+  enabled: true
+  fullnameOverride: ""
+  persistence:
+    enabled: true
+    storageClassName: local-storage
+    accessModes:
+      - ReadWriteOnce
+    size: 2Gi
+    existingClaim: ""
+    volumeName: pv-postgres
+    hostPath: /data/minikube-postgres
+  image:
+    repository: postgres
+    tag: "15"
+    pullPolicy: IfNotPresent
+  service:
+    name: ""
+    port: 5432
+    readWriteHost: ""
+    host: ""
+  resources: {}
+
+vault:
+  enabled: true
+  global:
+    namespace: vault
+  ingress:
+    enabled: true
+    className: ""
+    annotations: {}
+    hosts:
+      - host: vault.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+  server:
+    replicas: 1
+    image:
+      repository: hashicorp/vault
+      tag: "1.14.0"
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 8200
+      annotations: {}
+    config: |
+      listener "tcp" {
+        address     = "0.0.0.0:8200"
+        tls_disable = 1
+      }
+      disable_mlock = true
+      ui = true
+    extraEnvironmentVars: {}
+    resources: {}
+    podAnnotations: {}
+    podLabels: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+    storage:
+      enabled: true
+      size: 5Gi
+      storageClassName: local-storage
+      accessMode: ReadWriteOnce
+      annotations: {}
+      mountPath: /vault/data
+  ui:
+    enabled: true

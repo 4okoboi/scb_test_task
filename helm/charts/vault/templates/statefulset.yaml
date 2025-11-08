@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "vault.fullname" . }}
+  namespace: {{ include "vault.namespace" . }}
+  labels:
+    {{- include "vault.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "vault.fullname" . }}
+  replicas: {{ .Values.server.replicas }}
+  selector:
+    matchLabels:
+      {{- include "vault.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "vault.selectorLabels" . | nindent 8 }}
+        {{- with .Values.server.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.server.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      containers:
+        - name: vault
+          image: "{{ .Values.server.image.repository }}:{{ .Values.server.image.tag }}"
+          imagePullPolicy: {{ .Values.server.image.pullPolicy }}
+          args:
+            - "server"
+            - "-config=/vault/config/vault.hcl"
+          env:
+            - name: VAULT_API_ADDR
+              value: {{ printf "http://%s.%s.svc.cluster.local:%d" (include "vault.fullname" .) (include "vault.namespace" .) .Values.server.service.port | quote }}
+            {{- if .Values.ui.enabled }}
+            - name: VAULT_UI
+              value: "true"
+            {{- end }}
+            {{- range $key, $value := .Values.server.extraEnvironmentVars }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          ports:
+            - name: api
+              containerPort: {{ .Values.server.service.port }}
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /vault/config
+            {{- if .Values.server.storage.enabled }}
+            - name: data
+              mountPath: {{ .Values.server.storage.mountPath }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: /v1/sys/health?standbyok=true
+              port: api
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /v1/sys/health
+              port: api
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          {{- with .Values.server.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "vault.fullname" . }}-config
+      {{- with .Values.server.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- if .Values.server.storage.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        {{- with .Values.server.storage.annotations }}
+        annotations:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      spec:
+        accessModes:
+          - {{ .Values.server.storage.accessMode }}
+        resources:
+          requests:
+            storage: {{ .Values.server.storage.size }}
+        {{- if .Values.server.storage.storageClassName }}
+        storageClassName: {{ .Values.server.storage.storageClassName }}
+        {{- end }}
+  {{- end }}

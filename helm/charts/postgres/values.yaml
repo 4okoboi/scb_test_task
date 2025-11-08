@@ -1,0 +1,48 @@
+fullnameOverride: ""
+nameOverride: ""
+
+image:
+  repository: postgres
+  tag: "15"
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 5432
+  annotations: {}
+
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 2Gi
+  storageClassName: local-storage
+  existingClaim: ""
+  claimName: ""
+  volumeName: pv-postgres
+  hostPath: /data/minikube-postgres
+
+env:
+  databaseName: ""
+  secretName: ""
+  userKey: POSTGRES_USER
+  passwordKey: POSTGRES_PASSWORD
+
+resources: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

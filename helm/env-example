@@ -1,0 +1,12 @@
+# Copy to env and adjust for your environment
+export HELM_BIN="helm"
+export HELM_SECRETS_DRIVER="vals"
+export RELEASE_NAME="scb-app"
+export CHART_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export NAMESPACE="app"
+export KUBE_CONTEXT=""
+export VALUES_FILES="values.yaml values.secrets.yaml"
+export VALS_ADDR="https://vault.local:8200"
+export VALS_AUTH="approle"
+export VALS_AUTH_APPROLE_ROLE_ID="<vault-approle-role-id>"
+export VALS_AUTH_APPROLE_SECRET_ID="<vault-approle-secret-id>"
