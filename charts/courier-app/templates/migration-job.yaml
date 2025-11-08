@@ -1,0 +1,104 @@
+{{- if .Values.backend.migrationJob.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "courier-app.fullname" . }}-migrate
+  namespace: {{ include "courier-app.namespace" . }}
+  labels:
+    {{- include "courier-app.labels" . | nindent 4 }}
+  {{- with .Values.migrationJob.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+        - name: wait-for-postgres
+          image: {{ .Values.backend.initContainers.waitForPostgres.image }}
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for postgres..."
+              until nc -zv {{ include "courier-app.postgres.waitServiceFQDN" . }} {{ .Values.backend.initContainers.waitForPostgres.port }}; do
+                sleep 1
+              done
+              echo "Postgres is up"
+      containers:
+        - name: migrate
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          env:
+            - name: APP_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-config
+                  key: APP_ENV
+            - name: GUNICORN_WORKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-config
+                  key: GUNICORN_WORKERS
+            - name: GUNICORN_BIND
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-config
+                  key: GUNICORN_BIND
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-config
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-config
+                  key: POSTGRES_HOST
+            - name: POSTGRES_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-config
+                  key: POSTGRES_PORT
+            - name: AUTH_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-secret
+                  key: AUTH_SECRET_KEY
+            - name: AUTH_ALGORITHM
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-config
+                  key: AUTH_ALGORITHM
+            - name: AUTH_ACCESS_TOKEN_EXPIRE_MINUTES
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-config
+                  key: AUTH_ACCESS_TOKEN_EXPIRE_MINUTES
+            {{- if .Values.secrets.dadataApiKey }}
+            - name: DADATA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "courier-app.fullname" . }}-secret
+                  key: DADATA_API_KEY
+            {{- end }}
+          command:
+            - sh
+            - -c
+            - |
+              echo "Running alembic upgrade head..."
+              alembic upgrade head
+              echo "Done."
+{{- end }}

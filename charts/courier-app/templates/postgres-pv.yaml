@@ -1,0 +1,20 @@
+{{- if and .Values.postgres.enabled .Values.postgres.persistence.enabled (not .Values.postgres.persistence.existingClaim) .Values.postgres.persistence.hostPath.enabled }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ include "courier-app.postgres.fullname" . }}-pv
+  labels:
+    {{- include "courier-app.labels" . | nindent 4 }}
+    type: {{ .Values.postgres.persistence.selector.type | default "local" }}
+spec:
+  capacity:
+    storage: {{ .Values.postgres.persistence.size }}
+  accessModes:
+    {{- range .Values.postgres.persistence.accessModes }}
+    - {{ . }}
+    {{- end }}
+  storageClassName: {{ .Values.postgres.persistence.storageClass }}
+  hostPath:
+    path: {{ .Values.postgres.persistence.hostPath.path }}
+    type: DirectoryOrCreate
+{{- end }}

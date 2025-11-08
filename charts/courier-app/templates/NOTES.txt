@@ -1,0 +1,9 @@
+Thank you for installing {{ include "courier-app.fullname" . }}.
+
+To access the FastAPI application:
+  kubectl port-forward svc/{{ include "courier-app.backend.fullname" . }} {{ .Values.backend.service.port }}:{{ .Values.backend.service.port }}
+
+{{- if .Values.ingress.enabled }}
+An ingress has been created for {{ include "courier-app.backend.fullname" . }}.
+Review the configured hosts and TLS secrets before using it in production.
+{{- end }}

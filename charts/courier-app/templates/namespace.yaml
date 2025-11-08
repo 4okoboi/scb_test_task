@@ -1,0 +1,8 @@
+{{- if and .Values.namespace.create .Values.namespace.name }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.namespace.name }}
+  labels:
+    {{- include "courier-app.labels" . | nindent 4 }}
+{{- end }}

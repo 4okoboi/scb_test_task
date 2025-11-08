@@ -1,0 +1,6 @@
+apiVersion: v2
+name: courier-app
+description: Helm chart for the courier backend application and its PostgreSQL database
+version: 0.1.0
+appVersion: "0.4"
+type: application
